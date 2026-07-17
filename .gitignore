@@ -1,0 +1,17 @@
+# Carpetas de compilación de NetBeans/Ant
+build/
+dist/
+nbproject/private/
+
+# Archivos compilados de Java
+*.class
+
+# Archivos de logs
+*.log
+
+# Archivos temporales de Windows y Mac
+.DS_Store
+Thumbs.db
+
+# Configuración local de VS Code (opcional pero recomendado)
+.vscode/
