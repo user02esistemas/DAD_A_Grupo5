@@ -166,6 +166,49 @@
             padding: 30px; text-align: center; color: var(--gray-500);
             font-size: 13px;
         }
+        
+        .rep-mobile-logout { display: none; }
+
+        /* RESPONSIVE DESIGN PARA CELULARES */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .rep-sidebar {
+                width: 100%; height: 70px;
+                position: fixed; bottom: 0; left: 0;
+                flex-direction: row; justify-content: space-around; align-items: center;
+                padding: 0; z-index: 2000;
+                box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+            }
+            .rep-brand, .rep-footer, .rep-nav-label { display: none; }
+            .rep-mobile-logout { display: flex; color: #ef4444 !important; }
+            .rep-nav {
+                display: flex; flex-direction: row; width: 100%; padding: 0;
+                justify-content: space-evenly; align-items: center; overflow: visible;
+            }
+            .rep-link {
+                flex-direction: column; padding: 10px; margin: 0;
+                font-size: 11px; gap: 4px; border-radius: 0;
+                justify-content: center; flex: 1; text-align: center;
+            }
+            .rep-link.active {
+                background: transparent; border-top: 3px solid #5eead4; color: #5eead4;
+            }
+            .rep-link i { font-size: 20px; }
+            
+            .rep-main { padding: 16px; padding-bottom: 90px; }
+            .rep-header { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
+            .rep-header h1 { font-size: 22px; }
+            .rep-header button { width: 100%; }
+            
+            .rep-stat-grid { grid-template-columns: 1fr !important; gap: 12px !important; margin-bottom: 20px !important; }
+            .rep-delivery-details { grid-template-columns: 1fr !important; gap: 16px !important; }
+            
+            .delivery-card-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .delivery-card-footer { flex-direction: column; }
+            .delivery-card-footer button { width: 100%; padding: 12px; font-size: 14px; }
+            
+            .rep-map-modal { width: 95%; max-width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -190,6 +233,9 @@
             <div class="rep-nav-label">Comunicaci&oacute;n</div>
             <a class="rep-link" onclick="repShowSection('rep-chat')" data-section="rep-chat">
                 <i class="fas fa-comments"></i> Chat
+            </a>
+            <a href="index.jsp" class="rep-link rep-mobile-logout" title="Cerrar Sesión">
+                <i class="fas fa-sign-out-alt"></i> Salir
             </a>
         </nav>
         <div class="rep-footer">
@@ -216,7 +262,7 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+            <div class="rep-stat-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
                 <div class="rep-stat-card">
                     <div class="rep-stat-num"><%= pedidosDelivery.size() %></div>
                     <div class="rep-stat-lbl">Entregas Pendientes</div>
@@ -260,7 +306,7 @@
                             <span class="rep-status-badge <%= badgeClass %>"><%= st %></span>
                         </div>
                         <div class="delivery-card-body">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px;">
+                            <div class="rep-delivery-details" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px;">
                                 <div>
                                     <span style="color: var(--gray-500); font-size: 12px;">CLIENTE</span><br>
                                     <strong><%= p.getIdCliente().getNombreCompleto() %></strong>
@@ -302,12 +348,21 @@
                             </div>
                         </div>
                         <div class="delivery-card-footer">
+                            <% if (!"En Camino".equals(st) && !"Entregado".equals(st)) { %>
                             <button class="btn btn-primary btn-sm" onclick="repActualizarEstado(<%= p.getIdPedido() %>, 'En Camino')" style="background: #0f766e;">
                                 <i class="fas fa-play"></i> Iniciar Entrega
                             </button>
+                            <% } %>
+                            <% if ("En Camino".equals(st)) { %>
                             <button class="btn btn-sm" style="background: #22c55e; color: white;" onclick="repActualizarEstado(<%= p.getIdPedido() %>, 'Entregado')">
                                 <i class="fas fa-check"></i> Marcar Entregado
                             </button>
+                            <% } %>
+                            <% if ("Entregado".equals(st)) { %>
+                            <button class="btn btn-sm" style="background: #22c55e; color: white; opacity: 0.6; cursor: not-allowed;" disabled>
+                                <i class="fas fa-check-double"></i> Entrega Completada
+                            </button>
+                            <% } %>
                             <% if (hasCoords) { %>
                             <button class="btn btn-outline btn-sm" onclick="abrirMapaRepartidor('<%= latCli %>', '<%= lngCli %>', '<%= dirVisible.replace("'", "\\'") %>', '<%= p.getIdCliente().getNombreCompleto().replace("'", "\\'") %>')">
                                 <i class="fas fa-map-marked-alt"></i> Ver Ubicaci&oacute;n
@@ -353,10 +408,35 @@
                 </button>
             </div>
             <div class="card">
+                <% boolean hayHistorial = false; 
+                   for(Pedidos p : pedidosDelivery) {
+                       if("Entregado".equals(p.getEstado())) { hayHistorial = true; break; }
+                   }
+                   if (!hayHistorial) { %>
                 <div style="text-align: center; padding: 40px; color: var(--gray-500);">
                     <i class="fas fa-history" style="font-size: 40px; color: var(--gray-300); display: block; margin-bottom: 12px;"></i>
                     Tus entregas completadas aparecer&aacute;n aqu&iacute;.
                 </div>
+                <% } else { %>
+                <div style="overflow-x: auto;">
+                    <table class="table">
+                        <thead><tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Estado</th></tr></thead>
+                        <tbody>
+                        <% for(Pedidos p : pedidosDelivery) { 
+                            if("Entregado".equals(p.getEstado())) { 
+                                String fch = new java.text.SimpleDateFormat("dd/MM HH:mm").format(p.getFechaRecepcion());
+                        %>
+                            <tr>
+                                <td data-label="ID">#<%= p.getIdPedido() %></td>
+                                <td data-label="Cliente"><%= p.getIdCliente().getNombreCompleto() %></td>
+                                <td data-label="Fecha"><%= fch %></td>
+                                <td data-label="Estado"><span class="badge badge-success">Completado</span></td>
+                            </tr>
+                        <% } } %>
+                        </tbody>
+                    </table>
+                </div>
+                <% } %>
             </div>
         </section>
 

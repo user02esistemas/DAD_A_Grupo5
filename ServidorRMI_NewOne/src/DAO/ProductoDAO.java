@@ -108,7 +108,8 @@ public class ProductoDAO extends UnicastRemoteObject implements IGestionProducto
             tx.begin();
             Productos p = em.find(Productos.class, idProducto);
             if (p != null) {
-                em.remove(p);
+                p.setEstado(false);
+                em.merge(p);
                 tx.commit();
                 return true;
             }

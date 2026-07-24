@@ -81,9 +81,9 @@ public class OrdenClienteServlet extends HttpServlet {
                         
                         String estadoInicial;
                         if ("Recojo en Tienda".equals(modalidad)) {
-                            estadoInicial = "Preparando para Recojo";
+                            estadoInicial = "Recibido";
                         } else {
-                            estadoInicial = "Preparando Envío";
+                            estadoInicial = "Recibido";
                         }
                         
                         if ("servicio".equals(itemType)) {
@@ -191,7 +191,7 @@ public class OrdenClienteServlet extends HttpServlet {
             Pedidos p = new Pedidos();
             p.setIdCliente(new Clientes(clienteSession.getIdCliente()));
             p.setFechaRecepcion(new Date());
-            p.setEstado("Delivery".equals(modalidad) ? "Preparando Envío" : "Preparando para Recojo");
+            p.setEstado("Recibido");
             p.setMontoTotal(total);
             p.setMontoPagado(total);
             p.setEstadoPago("Pagado");

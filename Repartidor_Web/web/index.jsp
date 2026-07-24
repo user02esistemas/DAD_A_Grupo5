@@ -245,7 +245,6 @@
 
         @media (max-width: 768px) {
             .navbar { padding: 14px 20px; }
-            .nav-links { display: none; }
             .section-padding { padding: 60px 20px; }
             .hero h1 { font-size: 36px; }
             .section-header h2 { font-size: 30px; }

@@ -30,6 +30,21 @@ public class PedidoDAO extends UnicastRemoteObject implements IGestionPedidosRem
         try {
             tx.begin();
             em.persist(pedido);
+            
+            if (pedido.getDetallePedidoList() != null) {
+                for (DetallePedido dp : pedido.getDetallePedidoList()) {
+                    if (dp.getIdProducto() != null) {
+                        entidades.Productos prod = em.find(entidades.Productos.class, dp.getIdProducto().getIdProducto());
+                        if (prod != null && prod.getStock() != null) {
+                            int nuevoStock = prod.getStock() - dp.getCantidad();
+                            if (nuevoStock < 0) nuevoStock = 0;
+                            prod.setStock(nuevoStock);
+                            em.merge(prod);
+                        }
+                    }
+                }
+            }
+            
             tx.commit();
             return true;
         } catch (Exception e) {
@@ -141,6 +156,7 @@ public class PedidoDAO extends UnicastRemoteObject implements IGestionPedidosRem
     public List<Pedidos> listarPedidosPorCliente(int idCliente) throws RemoteException {
         EntityManager em = connectionDrive.getEntityManager();
         try {
+            em.getEntityManagerFactory().getCache().evictAll();
             String sql = "SELECT p FROM Pedidos p WHERE p.idCliente.idCliente = :idCliente ORDER BY p.idPedido DESC";
             List<Pedidos> lista = em.createQuery(sql, Pedidos.class).setParameter("idCliente", idCliente).getResultList();
             for (Pedidos p : lista) {
@@ -281,6 +297,7 @@ public class PedidoDAO extends UnicastRemoteObject implements IGestionPedidosRem
     public long contarActivosCliente(int idCliente) throws RemoteException {
         EntityManager em = connectionDrive.getEntityManager();
         try {
+            em.getEntityManagerFactory().getCache().evictAll();
             Query q = em.createQuery("SELECT COUNT(p) FROM Pedidos p WHERE p.idCliente.idCliente = :c AND p.estado NOT IN ('Entregado', 'Cancelado')");
             q.setParameter("c", idCliente);
             return (long) q.getSingleResult();
@@ -292,6 +309,7 @@ public class PedidoDAO extends UnicastRemoteObject implements IGestionPedidosRem
     public long contarCompletadosCliente(int idCliente) throws RemoteException {
         EntityManager em = connectionDrive.getEntityManager();
         try {
+            em.getEntityManagerFactory().getCache().evictAll();
             Query q = em.createQuery("SELECT COUNT(p) FROM Pedidos p WHERE p.idCliente.idCliente = :c AND p.estado = 'Entregado'");
             q.setParameter("c", idCliente);
             return (long) q.getSingleResult();
@@ -303,6 +321,7 @@ public class PedidoDAO extends UnicastRemoteObject implements IGestionPedidosRem
     public java.math.BigDecimal sumarTotalGastadoCliente(int idCliente) throws RemoteException {
         EntityManager em = connectionDrive.getEntityManager();
         try {
+            em.getEntityManagerFactory().getCache().evictAll();
             Query q = em.createQuery("SELECT SUM(p.montoTotal) FROM Pedidos p WHERE p.idCliente.idCliente = :c AND p.estado <> 'Cancelado'");
             q.setParameter("c", idCliente);
             java.math.BigDecimal total = (java.math.BigDecimal) q.getSingleResult();
@@ -315,6 +334,7 @@ public class PedidoDAO extends UnicastRemoteObject implements IGestionPedidosRem
     public List<Pedidos> listarRecientesCliente(int idCliente) throws RemoteException {
         EntityManager em = connectionDrive.getEntityManager();
         try {
+            em.getEntityManagerFactory().getCache().evictAll();
             String sql = "SELECT * FROM Pedidos p " +
                          "WHERE p.id_cliente = ? " +
                          "AND (" +

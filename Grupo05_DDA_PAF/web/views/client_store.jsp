@@ -105,9 +105,6 @@
                                     <button type="button" class="store-pay-btn" onclick="storeSelectPay('efectivo')" id="payBtnEfectivo">
                                         <i class="fas fa-money-bill-wave" style="color: #16a34a;"></i> Efectivo
                                     </button>
-                                    <button type="button" class="store-pay-btn" onclick="storeSelectPay('contraentrega')" id="payBtnContra">
-                                        <i class="fas fa-hand-holding-heart" style="color: #ea580c;"></i> Contra Entrega
-                                    </button>
                                 </div>
                             </div>
 
@@ -274,7 +271,7 @@
                             '<p style="color: var(--gray-600); font-size: 12px; margin: 0 0 10px; height: 32px; overflow: hidden; line-height: 1.4;">' + desc + '</p>' +
                             '<div style="display: flex; justify-content: space-between; align-items: center;">' +
                                 '<span style="font-weight: 800; color: var(--aqua-dark); font-size: 18px;">S/ ' + p.precio.toFixed(2) + '</span>' +
-                                '<button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); storeAddToCart(' + p.id + ', \'' + safeName + '\', ' + p.precio + ', 999, \'producto\')">' +
+                                '<button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); storeAddToCart(' + p.id + ', \'' + safeName + '\', ' + p.precio + ', ' + (p.stock || 0) + ', \'producto\')">' +
                                     '<i class="fas fa-plus"></i> Agregar' +
                                 '</button>' +
                             '</div>' +
@@ -337,14 +334,23 @@
     }
 
     function storeAddToCart(id, name, price, stock, type) {
+        if (type === 'producto' && stock <= 0) {
+            showNotification('Producto sin stock disponible', 'error');
+            return;
+        }
         var existing = storeCart.find(function(item) { return item.id === id; });
         if (existing) {
-            if (existing.qty < stock) existing.qty++;
+            if (existing.qty < stock) {
+                existing.qty++;
+                showNotification('Agregado: ' + name, 'success');
+            } else {
+                showNotification('Stock máximo alcanzado', 'error');
+            }
         } else {
             storeCart.push({ id: id, name: name, price: price, qty: 1, stock: stock, type: type });
+            showNotification('Agregado: ' + name, 'success');
         }
         storeRenderCart();
-        showNotification('Agregado: ' + name, 'success');
     }
 
     function storeRemoveFromCart(id) {
@@ -355,6 +361,10 @@
     function storeChangeQty(id, delta) {
         var item = storeCart.find(function(i) { return i.id === id; });
         if (item) {
+            if (delta > 0 && item.qty >= item.stock) {
+                showNotification('Stock máximo alcanzado', 'error');
+                return;
+            }
             item.qty += delta;
             if (item.qty <= 0) storeRemoveFromCart(id);
             else storeRenderCart();
@@ -541,6 +551,9 @@
         document.getElementById('storePayTransfer').style.display = 'none';
         document.getElementById('storePayContra').style.display = 'none';
         document.getElementById('storePayEfectivo').style.display = 'none';
+        
+        // Recargar los productos para actualizar el stock y ocultar agotados
+        storeLoadProducts();
     }
 
     function toggleCartPanel() {

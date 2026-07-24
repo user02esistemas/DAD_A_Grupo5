@@ -43,15 +43,24 @@ public class ProductosServlet extends HttpServlet {
                     continue;
                 }
                 
+                // Ocultar si no hay stock
+                if (p.getStock() == null || p.getStock() <= 0) {
+                    continue;
+                }
+                
                 String nombre = p.getNombre().replace("\"", "\\\"");
                 String desc = p.getDescripcion() != null ? p.getDescripcion().replace("\"", "\\\"").replace("\n", " ") : "";
                 String img = p.getImagenUrl() != null ? p.getImagenUrl() : "";
+                if (img.startsWith("uploads/")) {
+                    img = "/AdminEmpleado_Web/" + img;
+                }
                 
                 json.append("{");
                 json.append("\"id\":").append(p.getIdProducto()).append(",");
                 json.append("\"nombre\":\"").append(nombre).append("\",");
                 json.append("\"descripcion\":\"").append(desc).append("\",");
                 json.append("\"precio\":").append(p.getPrecio()).append(",");
+                json.append("\"stock\":").append(p.getStock()).append(",");
                 json.append("\"imagen\":\"").append(img).append("\"");
                 json.append("}");
                 

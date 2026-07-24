@@ -197,8 +197,8 @@ public class GestionServlet extends HttpServlet {
                 
                 p.setNombre(request.getParameter("nombre"));
                 p.setDescripcion(request.getParameter("desc"));
-                p.setPrecio(BigDecimal.valueOf(Double.parseDouble(request.getParameter("precio"))));
-                p.setStock(Integer.parseInt(request.getParameter("stock")));
+                p.setPrecio(BigDecimal.valueOf(Math.max(0.0, Double.parseDouble(request.getParameter("precio")))));
+                p.setStock(Math.max(0, Integer.parseInt(request.getParameter("stock"))));
                 p.setEstado(true);
 
                 // Lógica original de Diego para guardar la imagen en el servidor Web

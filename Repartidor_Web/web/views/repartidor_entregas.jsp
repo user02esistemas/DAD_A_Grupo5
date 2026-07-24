@@ -37,6 +37,19 @@
         display: flex; align-items: center; gap: 8px;
         border-top: 1px solid var(--gray-200);
     }
+    
+    @media (max-width: 768px) {
+        .rep-ent-map-modal { width: 95%; max-width: 100%; }
+        
+        .table thead { display: none; }
+        .table tbody, .table tr, .table td { display: block; width: 100%; box-sizing: border-box; }
+        .table tr { margin-bottom: 16px; border: 1px solid var(--gray-200); border-radius: 8px; padding: 12px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .table td { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border: none; border-bottom: 1px solid var(--gray-100); text-align: right; gap: 10px; }
+        .table td:last-child { border-bottom: none; flex-direction: column; align-items: stretch; }
+        .table td:last-child > div { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+        .table td:last-child button { width: 100%; }
+        .table td::before { content: attr(data-label); font-weight: 700; color: var(--gray-500); font-size: 11px; text-transform: uppercase; text-align: left; }
+    }
 </style>
 
 <%
@@ -97,12 +110,12 @@
                         boolean hasGPS = !latC.isEmpty() && !lngC.isEmpty();
                     %>
                     <tr>
-                        <td><strong>#<%= p.getIdPedido() %></strong></td>
-                        <td><%= p.getIdCliente().getNombreCompleto() %></td>
-                        <td><%= item %></td>
-                        <td><span class="badge <%= badgeClass %>"><%= st %></span></td>
-                        <td style="color: var(--gray-600);"><%= sdf2.format(p.getFechaRecepcion()) %></td>
-                        <td>
+                        <td data-label="ID"><strong>#<%= p.getIdPedido() %></strong></td>
+                        <td data-label="Cliente"><%= p.getIdCliente().getNombreCompleto() %></td>
+                        <td data-label="Producto"><%= item %></td>
+                        <td data-label="Estado"><span class="badge <%= badgeClass %>"><%= st %></span></td>
+                        <td data-label="Fecha" style="color: var(--gray-600);"><%= sdf2.format(p.getFechaRecepcion()) %></td>
+                        <td data-label="Ubicación">
                             <% if (hasGPS) { %>
                             <button class="btn btn-sm" style="background: #0f766e; color: white; font-size: 12px;"
                                 onclick="repEntAbrirMapa('<%= latC %>', '<%= lngC %>', '<%= dirVis.replace("'","\\'") %>', '<%= p.getIdCliente().getNombreCompleto().replace("'","\\'") %>')">
@@ -112,16 +125,19 @@
                             <span style="color: var(--gray-400); font-size: 12px;"><i class="fas fa-map-marker-alt"></i> Sin GPS</span>
                             <% } %>
                         </td>
-                        <td>
+                        <td data-label="Acción">
                             <div style="display: flex; gap: 6px;">
-                                <% if (!"Entregado".equals(st)) { %>
+                                <% if (!"En Camino".equals(st) && !"Entregado".equals(st)) { %>
                                 <button class="btn btn-primary btn-sm" onclick="repActualizarEstado(<%= p.getIdPedido() %>, 'En Camino')" style="background: #0f766e; font-size: 12px;">
                                     <i class="fas fa-play"></i> En Camino
                                 </button>
+                                <% } %>
+                                <% if ("En Camino".equals(st)) { %>
                                 <button class="btn btn-sm" style="background: #22c55e; color: white; font-size: 12px;" onclick="repActualizarEstado(<%= p.getIdPedido() %>, 'Entregado')">
                                     <i class="fas fa-check"></i> Entregado
                                 </button>
-                                <% } else { %>
+                                <% } %>
+                                <% if ("Entregado".equals(st)) { %>
                                 <span class="badge badge-success"><i class="fas fa-check"></i> Completado</span>
                                 <% } %>
                             </div>

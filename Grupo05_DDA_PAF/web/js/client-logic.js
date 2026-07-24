@@ -40,6 +40,15 @@ function showView(viewId, pushState = true) {
         newUrl.searchParams.set('view', viewId);
         window.history.pushState({}, '', newUrl);
     }
+    
+    // Auto-actualizar los datos de la vista que se acaba de abrir
+    if (viewId === 'dashboard' && typeof loadDashboardData === 'function') {
+        loadDashboardData();
+    } else if (viewId === 'orders' && typeof loadOrdersData === 'function') {
+        loadOrdersData();
+    } else if (viewId === 'store' && typeof storeLoadProducts === 'function') {
+        storeLoadProducts();
+    }
 }
 
 // ======================================================

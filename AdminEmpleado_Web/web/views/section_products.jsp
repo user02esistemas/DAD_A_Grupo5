@@ -90,11 +90,11 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
                         <div class="form-group">
                             <label class="form-label">Precio (S/)</label>
-                            <input type="number" name="precio" id="prodPrecio" class="form-input" required step="0.01">
+                            <input type="number" name="precio" id="prodPrecio" class="form-input" required step="0.01" min="0">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Stock</label>
-                            <input type="number" name="stock" id="prodStock" class="form-input" required>
+                            <input type="number" name="stock" id="prodStock" class="form-input" required min="0">
                         </div>
                     </div>
                     <div class="form-group">

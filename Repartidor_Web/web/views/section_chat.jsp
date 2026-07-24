@@ -104,6 +104,11 @@
         transition: all 0.2s;
     }
     .chat-send-btn:hover { background: #134e4a; transform: scale(1.05); }
+    
+    @media (max-width: 768px) {
+        .chat-container { height: calc(100vh - 220px); }
+        .chat-msg { max-width: 85%; }
+    }
 </style>
 
 <div class="chat-container">
